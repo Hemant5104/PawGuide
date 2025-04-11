@@ -1416,11 +1416,6 @@ function PetChatbot() {
                   regNo: "12325968",
                   avatar: "S",
                 },
-                // {
-                //   name: "Vansh Batra",
-                //   regNo: "12320191",
-                //   avatar: "V",
-                // },
               ].map((member, index) => (
                 <motion.div
                   key={index}
