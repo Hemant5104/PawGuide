@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, type ReactNode } from "react"
 
-type PetTheme = "purple" | "amber" | "blue" | "emerald" | "pink" | "indigo"
+export type PetTheme = "purple" | "amber" | "blue" | "emerald" | "pink" | "indigo"
 
 interface PetThemeContextType {
   petTheme: PetTheme

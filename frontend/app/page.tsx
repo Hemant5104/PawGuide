@@ -62,7 +62,9 @@ import remarkGfm from "remark-gfm" // Fixed import
 import rehypeRaw from "rehype-raw"
 import rehypeSanitize from "rehype-sanitize"
 
-const petIcons = [
+import { PetTheme } from "@/components/pet-theme-provider"
+
+const petIcons: { icon: any; color: string; name: string; themeColor: PetTheme }[] = [
   { icon: Cat, color: "text-purple-400", name: "Cat", themeColor: "purple" },
   { icon: Dog, color: "text-amber-400", name: "Dog", themeColor: "amber" },
   { icon: Fish, color: "text-blue-400", name: "Fish", themeColor: "blue" },
@@ -1400,7 +1402,7 @@ function PetChatbot() {
             <div className="text-center mb-4">
               <h3 className={cn("text-lg font-semibold", colors.primary)}>Meet The Team</h3>
               <p className={cn("text-sm", theme === "dark" ? "text-gray-400" : "text-gray-600")}>
-                Created with ❤️ by our talented developers
+                Created by our talented developers
               </p>
             </div>
 
@@ -1411,11 +1413,7 @@ function PetChatbot() {
                   regNo: "12305227",
                   avatar: "A",
                 },
-                {
-                  name: "Tushar Ahmad",
-                  regNo: "12325968",
-                  avatar: "S",
-                },
+                
               ].map((member, index) => (
                 <motion.div
                   key={index}

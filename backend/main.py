@@ -14,14 +14,14 @@ load_dotenv()
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Configure the Gemini API
+# Configure the Gemini API (do not hard-fail app startup in cloud envs)
 api_key = os.getenv("GEMINI_API_KEY")
-if not api_key:
-    raise ValueError("GEMINI_API_KEY environment variable not set")
-
-genai.configure(api_key=api_key)
-
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = None
+if api_key:
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel("gemini-1.5-flash")
+else:
+    logging.warning("GEMINI_API_KEY environment variable not set")
 
 app = FastAPI()
 
@@ -29,7 +29,8 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # In production, replace with specific origins
-    allow_credentials=True,
+    # Wildcard origins cannot be used with credentialed requests.
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -55,7 +56,7 @@ class ChatResponse(BaseModel):
 # function to check if a query is pet-related
 def is_pet_related(query: str) -> bool:
     pet_keywords = [
-        "thanks", "hi", "hello", "why", "what", "who"
+        "thanks", "hi", "hello", "why", "what", "who",
         "pet", "dog", "cat", "bird", "fish", "rabbit", "hamster", "guinea pig",
         "animal", "veterinarian", "vet", "breed", "food", "feed", "training",
         "behavior", "health", "care", "groom", "walk", "toy", "treat", "leash",
@@ -110,6 +111,12 @@ def format_with_markdown(text: str) -> str:
 async def chat(request: ChatRequest):
     logging.info("Received chat request")
     try:
+        if model is None:
+            raise HTTPException(
+                status_code=500,
+                detail="Server is not configured. Missing GEMINI_API_KEY.",
+            )
+
         # Get the last user message
         logging.info("Extracting last user message")
         last_user_message = next((m for m in reversed(request.messages) if m.role == "user"), None)

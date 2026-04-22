@@ -2,4 +2,7 @@ node_modules
 venv
 .env
 .next
+__pycache__/
+*.pyc
+frontend/.env.local
 

@@ -55,7 +55,9 @@ import remarkGfm from "remark-gfm" // Fixed import
 import rehypeRaw from "rehype-raw"
 import rehypeSanitize from "rehype-sanitize"
 
-const petIcons = [
+import { PetTheme } from "@/components/pet-theme-provider"
+
+const petIcons: { icon: any; color: string; name: string; themeColor: PetTheme }[] = [
   { icon: Cat, color: "text-purple-400", name: "Cat", themeColor: "purple" },
   { icon: Dog, color: "text-amber-400", name: "Dog", themeColor: "amber" },
   { icon: Fish, color: "text-blue-400", name: "Fish", themeColor: "blue" },
