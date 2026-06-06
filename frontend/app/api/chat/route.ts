@@ -120,25 +120,24 @@ async function handleWithGemini(apiKey: string, body: ChatRequestBody) {
   systemPrompt +=
     "If you're unsure about something, acknowledge the limitations of your knowledge and suggest consulting a veterinarian or professional."
 
-  // Initialize the Gemini client
+  // Initialize the Gemini client with system instruction
   const genAI = new GoogleGenerativeAI(apiKey)
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-flash",
+    systemInstruction: systemPrompt,
+  })
 
-  // Build conversation history for context
+  // Build conversation history — exclude the last user message (sent via sendMessage)
+  // Also filter out empty content and error messages
   const history = messages
-    .filter((m) => !m.content.startsWith("I'm having trouble")) // skip error messages
+    .slice(0, -1)
+    .filter((m) => m.content && m.content.trim() !== "" && !m.content.startsWith("I'm having trouble") && !m.content.startsWith("Error:"))
     .map((m) => ({
-      role: m.role === "user" ? "user" : ("model" as const),
+      role: m.role === "user" ? ("user" as const) : ("model" as const),
       parts: [{ text: m.content }],
     }))
 
-  // Remove the last user message from history (we'll send it via sendMessage)
-  const chatHistory = [
-    { role: "model" as const, parts: [{ text: systemPrompt }] },
-    ...history.slice(0, -1),
-  ]
-
-  const chat = model.startChat({ history: chatHistory })
+  const chat = model.startChat({ history })
   const result = await chat.sendMessage(lastUserMessage.content)
   const responseText = result.response.text()
 
