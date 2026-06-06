@@ -73,12 +73,21 @@ export async function POST(request: Request) {
     )
   } catch (error: any) {
     console.error("API route error:", error)
-    const errorMessage = error?.message || "Unknown error"
-    const hasApiKey = !!process.env.GEMINI_API_KEY
-    const hasBackendUrl = !!process.env.BACKEND_URL
+    const errorMessage = error?.message || ""
+
+    // Detect rate limit errors and give a helpful message
+    if (errorMessage.includes("429") || errorMessage.includes("quota")) {
+      return NextResponse.json(
+        {
+          text: "I'm currently experiencing high demand. Please wait a moment and try again. If this persists, the daily API quota may have been reached.",
+        },
+        { status: 429 },
+      )
+    }
+
     return NextResponse.json(
       {
-        text: `Error: ${errorMessage} | API_KEY set: ${hasApiKey} | BACKEND_URL set: ${hasBackendUrl}`,
+        text: "I'm having trouble connecting to my knowledge base right now. Please try again in a moment.",
       },
       { status: 500 },
     )
