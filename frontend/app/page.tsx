@@ -555,12 +555,12 @@ function PetChatbot() {
       // Prepare pet context if available
       const petContext = activePet
         ? {
-            name: activePet.name,
-            type: activePet.type,
-            breed: activePet.breed,
-            age: activePet.age,
-            notes: activePet.notes,
-          }
+          name: activePet.name,
+          type: activePet.type,
+          breed: activePet.breed,
+          age: activePet.age,
+          notes: activePet.notes,
+        }
         : null
 
       // Try to call the main API
@@ -577,6 +577,9 @@ function PetChatbot() {
           }),
           cache: "no-store",
         })
+        if (!response.ok) {
+          throw new Error(`Server responded with status: ${response.status}`)
+        }
       } catch (fetchError) {
         console.log("Main API failed, trying fallback:", fetchError)
         // If the main API fails, try the mock API
@@ -1413,7 +1416,7 @@ function PetChatbot() {
                   regNo: "12305227",
                   avatar: "A",
                 },
-                
+
               ].map((member, index) => (
                 <motion.div
                   key={index}
@@ -1437,7 +1440,7 @@ function PetChatbot() {
                   </div>
                   <h4 className="font-medium text-base">{member.name}</h4>
                   <p className={cn("text-sm", theme === "dark" ? "text-gray-400" : "text-gray-600")}>
-                    Registration No: {member.regNo}
+
                   </p>
                 </motion.div>
               ))}

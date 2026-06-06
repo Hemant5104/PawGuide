@@ -1,27 +1,76 @@
 import { NextResponse } from "next/server"
+import { GoogleGenerativeAI } from "@google/generative-ai"
+
+// Pet-related keywords for filtering (mirrors Python backend logic)
+const PET_KEYWORDS = [
+  "thanks", "hi", "hello", "why", "what", "who",
+  "pet", "dog", "cat", "bird", "fish", "rabbit", "hamster", "guinea pig",
+  "animal", "veterinarian", "vet", "breed", "food", "feed", "training",
+  "behavior", "health", "care", "groom", "walk", "toy", "treat", "leash",
+  "collar", "cage", "aquarium", "terrarium", "medicine", "vaccination",
+  "puppy", "kitten", "adoption", "shelter", "rescue", "spay", "neuter",
+  "pet food", "pet care", "pet grooming", "dog training", "cat litter",
+  "pet adoption", "pet shelter", "pet toys", "pet accessories", "pet supplies",
+  "dog walker", "pet insurance", "pet health", "pet vaccination", "pet hygiene",
+  "animal rescue", "pet boarding", "pet sitting",
+  "labrador", "german shepherd", "golden retriever", "french bulldog", "bulldog",
+  "poodle", "beagle", "rottweiler", "yorkshire terrier", "boxer",
+  "dachshund", "siberian husky", "great dane", "doberman", "australian shepherd",
+  "shih tzu", "boston terrier", "pomeranian", "cocker spaniel", "chihuahua",
+  "persian", "maine coon", "siamese", "ragdoll", "bengal",
+  "sphynx", "british shorthair", "scottish fold", "abyssinian", "birman",
+  "betta", "goldfish", "guppy", "angelfish", "neon tetra",
+  "budgerigar", "cockatiel", "african grey", "lovebird", "canary",
+  "macaw", "amazon parrot", "parakeet", "conure", "cockatoo",
+]
+
+function isPetRelated(query: string): boolean {
+  const lower = query.toLowerCase()
+  return PET_KEYWORDS.some((keyword) => lower.includes(keyword))
+}
+
+interface PetContext {
+  name: string
+  type: string
+  breed?: string
+  age?: string
+  notes?: string
+}
+
+interface ChatMessage {
+  role: string
+  content: string
+}
+
+interface ChatRequestBody {
+  messages: ChatMessage[]
+  petContext?: PetContext | null
+}
 
 export async function POST(request: Request) {
   try {
-    // Get the request body
-    const body = await request.json()
+    const body: ChatRequestBody = await request.json()
 
-    // Forward the request to the Python backend
-    const backendUrl = process.env.BACKEND_URL || "http://localhost:8000/api/chat"
+    const apiKey = process.env.GEMINI_API_KEY
+    const backendUrl = process.env.BACKEND_URL
 
-    const response = await fetch(backendUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    })
-
-    if (!response.ok) {
-      throw new Error(`Backend responded with status: ${response.status}`)
+    // ── Strategy 1: Call Gemini directly (preferred for Vercel) ──
+    if (apiKey) {
+      return await handleWithGemini(apiKey, body)
     }
 
-    const data = await response.json()
-    return NextResponse.json(data)
+    // ── Strategy 2: Proxy to Python backend on Render ──
+    if (backendUrl) {
+      return await handleWithBackend(backendUrl, body)
+    }
+
+    // ── No configuration available ──
+    return NextResponse.json(
+      {
+        text: "The server is not configured. Please set GEMINI_API_KEY or BACKEND_URL environment variable.",
+      },
+      { status: 500 },
+    )
   } catch (error) {
     console.error("API route error:", error)
     return NextResponse.json(
@@ -33,3 +82,78 @@ export async function POST(request: Request) {
   }
 }
 
+// ── Direct Gemini call (no Python backend needed) ──
+async function handleWithGemini(apiKey: string, body: ChatRequestBody) {
+  const { messages, petContext } = body
+
+  // Find the last user message
+  const lastUserMessage = [...messages].reverse().find((m) => m.role === "user")
+  if (!lastUserMessage) {
+    return NextResponse.json({ text: "No user message found." }, { status: 400 })
+  }
+
+  // Check if query is pet-related
+  if (!isPetRelated(lastUserMessage.content)) {
+    return NextResponse.json({
+      text: "I'm a pet assistant designed to help with pet-related questions. Could you please ask me something about pets, pet care, or animal behavior?",
+    })
+  }
+
+  // Build system prompt (mirrors Python backend)
+  let systemPrompt = "You are PawGuide, a helpful and friendly pet assistant. "
+
+  if (petContext) {
+    systemPrompt += `The user has a ${petContext.type} named ${petContext.name}. `
+    if (petContext.breed) systemPrompt += `Breed: ${petContext.breed}. `
+    if (petContext.age) systemPrompt += `Age: ${petContext.age}. `
+    if (petContext.notes) systemPrompt += `Additional information: ${petContext.notes}. `
+    systemPrompt += "Please consider this information when providing advice. "
+  }
+
+  systemPrompt +=
+    "Provide helpful, accurate, and concise information about pet care, behavior, training, nutrition, or health. "
+  systemPrompt +=
+    "Format your response using markdown for better readability. Use headings, lists, and emphasis where appropriate. "
+  systemPrompt +=
+    "If you're unsure about something, acknowledge the limitations of your knowledge and suggest consulting a veterinarian or professional."
+
+  // Initialize the Gemini client
+  const genAI = new GoogleGenerativeAI(apiKey)
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+
+  // Build conversation history for context
+  const history = messages
+    .filter((m) => !m.content.startsWith("I'm having trouble")) // skip error messages
+    .map((m) => ({
+      role: m.role === "user" ? "user" : ("model" as const),
+      parts: [{ text: m.content }],
+    }))
+
+  // Remove the last user message from history (we'll send it via sendMessage)
+  const chatHistory = [
+    { role: "model" as const, parts: [{ text: systemPrompt }] },
+    ...history.slice(0, -1),
+  ]
+
+  const chat = model.startChat({ history: chatHistory })
+  const result = await chat.sendMessage(lastUserMessage.content)
+  const responseText = result.response.text()
+
+  return NextResponse.json({ text: responseText })
+}
+
+// ── Proxy to Python backend (Render) ──
+async function handleWithBackend(backendUrl: string, body: ChatRequestBody) {
+  const response = await fetch(backendUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Backend responded with status: ${response.status}`)
+  }
+
+  const data = await response.json()
+  return NextResponse.json(data)
+}

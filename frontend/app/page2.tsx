@@ -511,6 +511,9 @@ function PetChatbot() {
           }),
           cache: "no-store",
         })
+        if (!response.ok) {
+          throw new Error(`Server responded with status: ${response.status}`)
+        }
       } catch (fetchError) {
         console.log("Main API failed, trying fallback:", fetchError)
         // If the main API fails, try the mock API
