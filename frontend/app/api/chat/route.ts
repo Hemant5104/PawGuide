@@ -71,11 +71,14 @@ export async function POST(request: Request) {
       },
       { status: 500 },
     )
-  } catch (error) {
+  } catch (error: any) {
     console.error("API route error:", error)
+    const errorMessage = error?.message || "Unknown error"
+    const hasApiKey = !!process.env.GEMINI_API_KEY
+    const hasBackendUrl = !!process.env.BACKEND_URL
     return NextResponse.json(
       {
-        text: "I'm having trouble connecting to my knowledge base right now. Please try again in a moment.",
+        text: `Error: ${errorMessage} | API_KEY set: ${hasApiKey} | BACKEND_URL set: ${hasBackendUrl}`,
       },
       { status: 500 },
     )
