@@ -640,8 +640,12 @@ function PetChatbot() {
   // Return a loading state or nothing during server-side rendering
   if (!mounted) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      <div className="flex min-h-screen items-center justify-center bg-[#0c111d]">
+        <div className="animate-float">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center animate-pulse-glow">
+            <PawPrintIcon className="w-8 h-8 text-white" />
+          </div>
+        </div>
       </div>
     )
   }
@@ -703,8 +707,8 @@ function PetChatbot() {
       className={cn(
         "flex min-h-screen",
         theme === "dark"
-          ? "bg-gradient-to-b from-gray-900 to-gray-950 text-gray-100"
-          : "bg-gradient-to-b from-gray-50 to-white text-gray-800",
+          ? "bg-[#0c111d] text-gray-100"
+          : "bg-[#e4e4e4] text-gray-800",
       )}
     >
       {/* Welcome Tour */}
@@ -772,118 +776,78 @@ function PetChatbot() {
 
       {/* Keyboard Shortcuts Dialog */}
       <Dialog open={showShortcutsDialog} onOpenChange={setShowShortcutsDialog}>
-        <DialogContent>
+        <DialogContent className={theme === "dark" ? "neu-raised" : ""}>
           <DialogHeader>
             <DialogTitle>Keyboard Shortcuts</DialogTitle>
-            <DialogDescription>Use these keyboard shortcuts to navigate PawGuide more efficiently.</DialogDescription>
+            <DialogDescription>Navigate PawGuide more efficiently.</DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 items-center gap-4">
-              <div className="font-medium">Ctrl+K</div>
-              <div>Toggle sidebar</div>
-            </div>
-            <div className="grid grid-cols-2 items-center gap-4">
-              <div className="font-medium">Ctrl+L</div>
-              <div>Clear chat</div>
-            </div>
-            <div className="grid grid-cols-2 items-center gap-4">
-              <div className="font-medium">Ctrl+S</div>
-              <div>Save chat</div>
-            </div>
-            <div className="grid grid-cols-2 items-center gap-4">
-              <div className="font-medium">Ctrl+E</div>
-              <div>Export chat</div>
-            </div>
-            <div className="grid grid-cols-2 items-center gap-4">
-              <div className="font-medium">Ctrl+D</div>
-              <div>Toggle dark/light mode</div>
-            </div>
-            <div className="grid grid-cols-2 items-center gap-4">
-              <div className="font-medium">Ctrl+/</div>
-              <div>Show this help</div>
-            </div>
+          <div className="grid gap-3 py-4">
+            {[
+              ["Ctrl+K", "Toggle sidebar"],
+              ["Ctrl+L", "Clear chat"],
+              ["Ctrl+S", "Save chat"],
+              ["Ctrl+E", "Export chat"],
+              ["Ctrl+D", "Toggle theme"],
+              ["Ctrl+/", "Show this help"],
+            ].map(([key, desc]) => (
+              <div key={key} className="flex items-center justify-between">
+                <kbd className="px-2 py-1 rounded text-xs font-mono bg-gray-800/50 border border-gray-700/50 text-purple-300">{key}</kbd>
+                <span className="text-sm text-gray-400">{desc}</span>
+              </div>
+            ))}
           </div>
         </DialogContent>
       </Dialog>
 
       <div className="flex flex-col flex-1">
+        {/* ═══ HEADER ═══ */}
         <motion.header
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.4 }}
           className={cn(
-            "sticky top-0 z-10 border-b shadow-lg",
-            theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200",
+            "sticky top-0 z-10 h-16",
+            theme === "dark" ? "neu-flat" : "neu-flat",
           )}
         >
-          <div className="container flex items-center h-16 px-4 mx-auto max-w-4xl">
+          <div className="flex items-center h-full px-4 mx-auto max-w-4xl">
             {/* Sidebar toggle */}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className={theme === "dark" ? "text-gray-300" : "text-gray-700"}
+              className="text-gray-400 hover:text-white transition-colors"
+              id="sidebar-toggle"
             >
               <Menu className="h-5 w-5" />
             </Button>
 
             <motion.div
-              whileHover={{ rotate: 20 }}
+              whileHover={{ rotate: 15 }}
               whileTap={{ scale: 0.9 }}
               onClick={cycleIcon}
               className="cursor-pointer ml-2"
             >
-              <PetIcon className={`w-8 h-8 mr-3 ${petColor}`} />
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                <PetIcon className="w-5 h-5 text-white" />
+              </div>
             </motion.div>
 
-            <h1 className={cn("text-xl font-bold", colors.primary)}>PawGuide Assistant</h1>
+            <h1 className="text-lg font-bold ml-3 bg-gradient-to-r from-purple-300 to-indigo-300 bg-clip-text text-transparent">
+              PawGuide
+            </h1>
 
             {/* Active pet badge */}
             {activePet && (
-              <Badge variant="outline" className={cn("ml-2", colors.border, colors.primary)}>
-                {activePet.name} ({activePet.type})
+              <Badge variant="outline" className="ml-2 border-purple-500/30 text-purple-300 text-xs">
+                {activePet.name}
               </Badge>
             )}
 
             <div className="flex-1"></div>
 
-            <div className="flex items-center space-x-2">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setShowShortcutsDialog(true)}
-                      className={theme === "dark" ? "text-gray-300" : "text-gray-700"}
-                    >
-                      <Keyboard className="h-5 w-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Keyboard shortcuts</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setShowWelcomeTour(true)}
-                      className={theme === "dark" ? "text-gray-300" : "text-gray-700"}
-                    >
-                      <HelpCircle className="h-5 w-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Show tour</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-
+            {/* Simplified toolbar — key actions visible, rest in menu */}
+            <div className="flex items-center gap-1">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -891,74 +855,50 @@ function PetChatbot() {
                       variant="ghost"
                       size="icon"
                       onClick={toggleTheme}
-                      className={theme === "dark" ? "text-gray-300" : "text-gray-700"}
+                      className="text-gray-400 hover:text-purple-300 transition-colors h-9 w-9"
                     >
-                      {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                      {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Toggle theme</p>
-                  </TooltipContent>
+                  <TooltipContent><p>Toggle theme</p></TooltipContent>
                 </Tooltip>
               </TooltipProvider>
 
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setShowTimestamps(!showTimestamps)}
-                      className={theme === "dark" ? "text-gray-300" : "text-gray-700"}
-                    >
-                      <Clock className="h-5 w-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Toggle timestamps</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-
+              {/* More actions dropdown */}
               <DropdownMenu>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className={theme === "dark" ? "text-gray-300" : "text-gray-700"}
-                        >
-                          <PetIcon className={`h-5 w-5 ${petColor}`} />
-                        </Button>
-                      </DropdownMenuTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Change assistant</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-gray-400 hover:text-purple-300 h-9 w-9">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                    </svg>
+                  </Button>
+                </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className={theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}
+                  className={theme === "dark" ? "bg-[#151c2c] border-gray-700/50" : "bg-white border-gray-200"}
                 >
+                  <DropdownMenuItem onClick={() => setShowTimestamps(!showTimestamps)} className="cursor-pointer gap-2">
+                    <Clock className="h-4 w-4" /> {showTimestamps ? "Hide" : "Show"} timestamps
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowShortcutsDialog(true)} className="cursor-pointer gap-2">
+                    <Keyboard className="h-4 w-4" /> Keyboard shortcuts
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowWelcomeTour(true)} className="cursor-pointer gap-2">
+                    <HelpCircle className="h-4 w-4" /> Show tour
+                  </DropdownMenuItem>
                   {petIcons.map((pet, index) => (
                     <DropdownMenuItem
                       key={index}
                       onClick={() => setSelectedPet(index)}
-                      className={cn(
-                        "cursor-pointer flex items-center gap-2",
-                        selectedPet === index && (theme === "dark" ? "bg-gray-700" : "bg-gray-100"),
-                      )}
+                      className={cn("cursor-pointer gap-2", selectedPet === index && "bg-purple-500/10")}
                     >
-                      <pet.icon className={`w-5 h-5 ${pet.color}`} />
-                      <span>{pet.name} Assistant</span>
+                      <pet.icon className={`w-4 h-4 ${pet.color}`} /> {pet.name} Assistant
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
 
+              {/* Save chat */}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -967,36 +907,16 @@ function PetChatbot() {
                       size="icon"
                       onClick={saveChat}
                       disabled={messages.length === 0}
-                      className={theme === "dark" ? "text-gray-300" : "text-gray-700"}
+                      className="text-gray-400 hover:text-purple-300 transition-colors h-9 w-9"
                     >
-                      <BookmarkPlus className="h-5 w-5" />
+                      <BookmarkPlus className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Save chat</p>
-                  </TooltipContent>
+                  <TooltipContent><p>Save chat</p></TooltipContent>
                 </Tooltip>
               </TooltipProvider>
 
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={exportChat}
-                      disabled={messages.length === 0}
-                      className={theme === "dark" ? "text-gray-300" : "text-gray-700"}
-                    >
-                      <Download className="h-5 w-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Export chat</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-
+              {/* Clear chat */}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -1005,450 +925,377 @@ function PetChatbot() {
                       size="icon"
                       onClick={clearChat}
                       disabled={messages.length === 0}
-                      className={
-                        theme === "dark" ? "text-gray-300 hover:text-red-400" : "text-gray-700 hover:text-red-600"
-                      }
+                      className="text-gray-400 hover:text-red-400 transition-colors h-9 w-9"
                     >
-                      <Trash2 className="h-5 w-5" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Clear chat</p>
-                  </TooltipContent>
+                  <TooltipContent><p>Clear chat</p></TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
           </div>
         </motion.header>
 
-        <main className="flex-1 container max-w-4xl mx-auto p-4 overflow-hidden flex flex-col">
+        {/* ═══ CHAT CONTAINER (fills remaining space) ═══ */}
+        <div className="chat-container">
           {error && (
-            <Alert
-              variant="destructive"
-              className={cn("mb-4", theme === "dark" ? "bg-red-900 border-red-800" : "bg-red-100 border-red-200")}
-            >
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
+            <div className="px-4 pt-3 max-w-4xl mx-auto w-full">
+              <Alert
+                variant="destructive"
+                className={cn("neu-raised-sm", theme === "dark" ? "border-red-900/50 bg-red-950/40" : "")}
+              >
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            </div>
           )}
 
-          <div className="flex-1 overflow-y-auto mb-4 space-y-4 pr-2">
-            <AnimatePresence>
-              {messages.length === 0 ? (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="flex flex-col items-center justify-center h-[60vh] text-center p-8 space-y-6"
-                >
+          {/* ═══ MESSAGES AREA (scrollable) ═══ */}
+          <div className="chat-messages">
+            <div className="max-w-4xl mx-auto">
+              <AnimatePresence>
+                {messages.length === 0 ? (
+                  /* ═══ WELCOME SCREEN ═══ */
                   <motion.div
-                    animate={{
-                      scale: [1, 1.1, 1],
-                      rotate: [0, 5, -5, 0],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Number.POSITIVE_INFINITY,
-                      repeatType: "reverse",
-                    }}
-                    className={theme === "dark" ? "bg-gray-800 p-6 rounded-full" : "bg-gray-100 p-6 rounded-full"}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="flex flex-col items-center justify-center min-h-[65vh] text-center p-6 relative"
                   >
-                    <PetIcon className={`w-16 h-16 ${petColor}`} />
-                  </motion.div>
-                  <h2 className={cn("text-2xl font-semibold", colors.primary)}>Welcome to PawGuide!</h2>
-                  <p className={theme === "dark" ? "text-gray-400 max-w-md" : "text-gray-600 max-w-md"}>
-                    Ask me anything about pet care, behavior, training, nutrition, or health concerns.
-                  </p>
+                    {/* Floating gradient orbs */}
+                    <div className="welcome-gradient-orb w-72 h-72 bg-purple-600 top-10 left-1/4" />
+                    <div className="welcome-gradient-orb w-56 h-56 bg-indigo-600 bottom-20 right-1/4" />
+                    <div className="welcome-gradient-orb w-40 h-40 bg-pink-600 top-1/2 left-1/2" />
 
-                  {petProfiles.length > 0 && (
-                    <div className="mt-2">
-                      <p className="text-sm mb-2">Select a pet for personalized advice:</p>
-                      <div className="flex flex-wrap gap-2 justify-center">
-                        {petProfiles.map((pet) => (
-                          <Badge
-                            key={pet.id}
-                            variant={activePet?.id === pet.id ? "default" : "outline"}
-                            className={cn(
-                              "cursor-pointer px-3 py-1",
-                              activePet?.id === pet.id ? colors.button : colors.border,
-                            )}
-                            onClick={() => setActivePetProfile(pet.id)}
-                          >
-                            {pet.name} ({pet.type})
-                          </Badge>
-                        ))}
+                    {/* Main icon with neumorphic container */}
+                    <motion.div
+                      animate={{ y: [0, -8, 0] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                      className="relative z-10 mb-8"
+                    >
+                      <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-purple-500 via-violet-500 to-indigo-600 flex items-center justify-center shadow-2xl shadow-purple-500/30 animate-pulse-glow">
+                        <PetIcon className="w-12 h-12 text-white" />
                       </div>
-                    </div>
-                  )}
+                    </motion.div>
 
-                  <div className="grid grid-cols-2 gap-3 mt-4">
-                    {[
-                      "How do I train my puppy?",
-                      "What should I feed my cat?",
-                      "Why is my bird losing feathers?",
-                      "Best toys for rabbits?",
-                    ].map((suggestion, i) => (
-                      <motion.button
-                        key={i}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5 + i * 0.1 }}
-                        whileHover={{ scale: 1.05 }}
-                        className={cn(
-                          "px-4 py-2 rounded-lg text-sm text-left",
-                          theme === "dark"
-                            ? "bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-700"
-                            : "bg-white text-gray-700 hover:text-gray-900 hover:bg-gray-50 border border-gray-200",
-                        )}
-                        onClick={() => {
-                          setInput(suggestion)
-                          setTimeout(() => {
-                            const event = new Event("submit") as any
-                            handleSubmit(event)
-                          }, 100)
-                        }}
-                      >
-                        {suggestion}
-                      </motion.button>
-                    ))}
-                  </div>
-                </motion.div>
-              ) : (
-                messages.map((message, index) => (
-                  <motion.div
-                    key={message.id}
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                    className={cn("flex items-start gap-3 max-w-[85%]", message.role === "user" ? "ml-auto" : "")}
-                  >
-                    {message.role !== "user" && (
-                      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                        <Avatar
-                          className={cn("mt-1 border-2", theme === "dark" ? "border-gray-700" : "border-gray-200")}
-                        >
-                          <AvatarFallback className={theme === "dark" ? "bg-gray-800" : "bg-gray-100"}>
-                            <PetIcon className={`w-5 h-5 ${petColor}`} />
-                          </AvatarFallback>
-                        </Avatar>
-                      </motion.div>
-                    )}
-                    <div className="flex flex-col">
-                      {showTimestamps && (
-                        <span className={cn("text-xs mb-1", theme === "dark" ? "text-gray-500" : "text-gray-500")}>
-                          {format(message.timestamp, "h:mm a")}
-                        </span>
-                      )}
-                      <div className="flex flex-col">
-                        <motion.div
-                          whileHover={{ scale: 1.01 }}
-                          className={cn(
-                            "rounded-lg px-4 py-2 relative group",
-                            message.role === "user"
-                              ? theme === "dark"
-                                ? "bg-gray-800 text-gray-100 border border-gray-700"
-                                : "bg-gray-100 text-gray-800 border border-gray-200"
-                              : theme === "dark"
-                                ? cn(colors.bg, "text-gray-100", colors.border)
-                                : cn(colors.bg, "text-gray-800", colors.border),
-                            message.role === "assistant" && "markdown-content",
-                          )}
-                        >
-                          {message.isTyping && message.role === "assistant" ? (
-                            typingText || (
-                              <motion.div
-                                animate={{
-                                  opacity: [0.5, 1, 0.5],
-                                }}
-                                transition={{
-                                  duration: 1.5,
-                                  repeat: Number.POSITIVE_INFINITY,
-                                }}
-                                className="flex space-x-1"
-                              >
-                                <div className="w-2 h-2 rounded-full bg-current"></div>
-                                <div className="w-2 h-2 rounded-full bg-current"></div>
-                                <div className="w-2 h-2 rounded-full bg-current"></div>
-                              </motion.div>
-                            )
-                          ) : message.role === "assistant" ? (
-                            <ReactMarkdown
-                              remarkPlugins={[remarkGfm]}
-                              rehypePlugins={[rehypeRaw, rehypeSanitize]}
-                              className="prose prose-sm dark:prose-invert max-w-none"
-                              components={{
-                                a: ({ node, ...props }) => (
-                                  <a
-                                    {...props}
-                                    className="text-blue-500 hover:underline"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  />
-                                ),
-                                ul: ({ node, ...props }) => <ul {...props} className="list-disc pl-5 my-2" />,
-                                ol: ({ node, ...props }) => <ol {...props} className="list-decimal pl-5 my-2" />,
-                                li: ({ node, ...props }) => <li {...props} className="my-1" />,
-                                h1: ({ node, ...props }) => <h1 {...props} className="text-xl font-bold my-3" />,
-                                h2: ({ node, ...props }) => <h2 {...props} className="text-lg font-bold my-2" />,
-                                h3: ({ node, ...props }) => <h3 {...props} className="text-md font-bold my-2" />,
-                                p: ({ node, ...props }) => <p {...props} className="my-2" />,
-                                code: ({ node, inline, ...props }) =>
-                                  inline ? (
-                                    <code
-                                      {...props}
-                                      className="bg-gray-200 dark:bg-gray-700 px-1 py-0.5 rounded text-sm"
-                                    />
-                                  ) : (
-                                    <code
-                                      {...props}
-                                      className="block bg-gray-200 dark:bg-gray-700 p-2 rounded text-sm overflow-x-auto my-2"
-                                    />
-                                  ),
-                                pre: ({ node, ...props }) => (
-                                  <pre
-                                    {...props}
-                                    className="bg-gray-200 dark:bg-gray-700 p-2 rounded overflow-x-auto my-2"
-                                  />
-                                ),
-                                blockquote: ({ node, ...props }) => (
-                                  <blockquote {...props} className={`border-l-4 pl-4 italic my-2 ${colors.border}`} />
-                                ),
-                                hr: ({ node, ...props }) => (
-                                  <hr {...props} className="my-4 border-gray-300 dark:border-gray-700" />
-                                ),
-                                table: ({ node, ...props }) => (
-                                  <table {...props} className="border-collapse table-auto w-full my-2" />
-                                ),
-                                th: ({ node, ...props }) => (
-                                  <th
-                                    {...props}
-                                    className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left"
-                                  />
-                                ),
-                                td: ({ node, ...props }) => (
-                                  <td {...props} className="border border-gray-300 dark:border-gray-700 px-4 py-2" />
-                                ),
-                              }}
+                    <h2 className="relative z-10 text-3xl font-bold mb-3 bg-gradient-to-r from-purple-300 via-violet-300 to-indigo-300 bg-clip-text text-transparent">
+                      Welcome to PawGuide
+                    </h2>
+                    <p className="relative z-10 text-gray-400 max-w-md mb-8 text-sm leading-relaxed">
+                      Your AI-powered pet care companion. Ask about training, nutrition,
+                      health, behavior, or anything pet-related.
+                    </p>
+
+                    {petProfiles.length > 0 && (
+                      <div className="relative z-10 mb-6">
+                        <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider">Select a pet for personalized advice</p>
+                        <div className="flex flex-wrap gap-2 justify-center">
+                          {petProfiles.map((pet) => (
+                            <Badge
+                              key={pet.id}
+                              variant={activePet?.id === pet.id ? "default" : "outline"}
+                              className={cn(
+                                "cursor-pointer px-3 py-1 transition-all",
+                                activePet?.id === pet.id
+                                  ? "bg-purple-600 text-white border-purple-500"
+                                  : "border-gray-700 text-gray-400 hover:border-purple-500/50 hover:text-purple-300",
+                              )}
+                              onClick={() => setActivePetProfile(pet.id)}
                             >
-                              {message.content}
-                            </ReactMarkdown>
-                          ) : (
-                            message.content
-                          )}
-
-                          {/* Save as knowledge card button for assistant messages */}
-                          {message.role === "assistant" && !message.isTyping && (
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="absolute -right-2 -top-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                  <BookmarkPlus className="h-4 w-4" />
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Save as Knowledge Card</DialogTitle>
-                                  <DialogDescription>
-                                    Create a knowledge card from this information for future reference.
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <div className="grid gap-4 py-4">
-                                  <div className="grid gap-2">
-                                    <Label htmlFor="card-title">Title</Label>
-                                    <Input
-                                      id="card-title"
-                                      placeholder="e.g., How to brush your dog's teeth"
-                                      className="col-span-3"
-                                      defaultValue={message.keywords?.length ? `Tips about ${message.keywords[0]}` : ""}
-                                    />
-                                  </div>
-                                  <div className="grid gap-2">
-                                    <Label htmlFor="card-content">Content</Label>
-                                    <Textarea
-                                      id="card-content"
-                                      className="col-span-3 h-24"
-                                      defaultValue={message.content}
-                                      readOnly
-                                    />
-                                  </div>
-                                </div>
-                                <DialogFooter>
-                                  <Button
-                                    type="submit"
-                                    className={colors.button}
-                                    onClick={() => {
-                                      const titleInput = document.getElementById("card-title") as HTMLInputElement
-                                      createKnowledgeCard(message, titleInput.value)
-                                    }}
-                                  >
-                                    Save Card
-                                  </Button>
-                                </DialogFooter>
-                              </DialogContent>
-                            </Dialog>
-                          )}
-                        </motion.div>
-
-                        {/* Display keywords as badges */}
-                        {message.keywords && message.keywords.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {message.keywords.map((keyword, i) => (
-                              <Badge key={i} variant="outline" className={cn("text-xs", colors.border, colors.primary)}>
-                                {keyword}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
+                              {pet.name} ({pet.type})
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                    {message.role === "user" && (
-                      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                        <Avatar
-                          className={cn("mt-1 border-2", theme === "dark" ? "border-gray-700" : "border-gray-200")}
-                        >
-                          <AvatarFallback
-                            className={theme === "dark" ? "bg-gray-800 text-white" : "bg-gray-100 text-gray-800"}
-                          >
-                            U
-                          </AvatarFallback>
-                        </Avatar>
-                      </motion.div>
                     )}
-                  </motion.div>
-                ))
-              )}
-            </AnimatePresence>
 
-            {/* Quick Suggestions */}
-            {messages.length > 0 && !isLoading && !isTyping && (
-              <QuickSuggestions
-                onSelectSuggestion={handleSuggestionSelect}
-                lastUserMessage={lastUserMessage}
-                theme={theme}
-                colors={colors}
-              />
-            )}
-
-            {isLoading && !isTyping && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-start gap-3"
-              >
-                <Avatar className={cn("mt-1 border-2", theme === "dark" ? "border-gray-700" : "border-gray-200")}>
-                  <AvatarFallback className={theme === "dark" ? "bg-gray-800" : "bg-gray-100"}>
-                    <PetIcon className={`w-5 h-5 ${petColor}`} />
-                  </AvatarFallback>
-                </Avatar>
-                <div
-                  className={cn(
-                    "rounded-lg px-4 py-2 border",
-                    theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200",
-                  )}
-                >
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.2, 1],
-                    }}
-                    transition={{
-                      duration: 1.5,
-                      repeat: Number.POSITIVE_INFINITY,
-                    }}
-                  >
-                    <Loader2 className={`w-5 h-5 animate-spin ${petColor}`} />
+                    {/* Suggestion cards — neumorphic */}
+                    <div className="relative z-10 grid grid-cols-2 gap-3 w-full max-w-lg">
+                      {[
+                        { text: "How do I train my puppy?", icon: "🐕" },
+                        { text: "What should I feed my cat?", icon: "🐱" },
+                        { text: "Why is my bird losing feathers?", icon: "🐦" },
+                        { text: "Best toys for rabbits?", icon: "🐰" },
+                      ].map((suggestion, i) => (
+                        <motion.button
+                          key={i}
+                          initial={{ opacity: 0, y: 15 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.4 + i * 0.1 }}
+                          whileHover={{ y: -2 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="suggestion-chip text-left flex items-start gap-2"
+                          onClick={() => {
+                            setInput(suggestion.text)
+                            setTimeout(() => {
+                              const event = new Event("submit") as any
+                              handleSubmit(event)
+                            }, 100)
+                          }}
+                        >
+                          <span className="text-lg mt-0.5">{suggestion.icon}</span>
+                          <span>{suggestion.text}</span>
+                        </motion.button>
+                      ))}
+                    </div>
                   </motion.div>
-                </div>
-              </motion.div>
-            )}
-            <div ref={messagesEndRef} />
-            <motion.form
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              onSubmit={handleSubmit}
-              className={cn(
-                "sticky bottom-0 rounded-lg border shadow-lg p-3 flex gap-2 mb-8",
-                theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200",
-              )}
-            >
-              <Input
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about your pet..."
-                className={cn(
-                  "flex-1",
-                  theme === "dark"
-                    ? "bg-gray-900 border-gray-700 text-gray-100 focus-visible:ring-purple-500"
-                    : "bg-gray-50 border-gray-200 text-gray-800 focus-visible:ring-amber-500",
+                ) : (
+                  /* ═══ CHAT MESSAGES ═══ */
+                  messages.map((message, index) => (
+                    <motion.div
+                      key={message.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className={cn("flex items-start gap-3 mb-4", message.role === "user" ? "justify-end" : "")}
+                    >
+                      {message.role !== "user" && (
+                        <div className="flex-shrink-0 mt-1">
+                          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/15">
+                            <PetIcon className="w-4 h-4 text-white" />
+                          </div>
+                        </div>
+                      )}
+                      <div className={cn("flex flex-col max-w-[80%]", message.role === "user" ? "items-end" : "items-start")}>
+                        {showTimestamps && (
+                          <span className="text-[10px] mb-1 text-gray-500 font-medium">
+                            {format(message.timestamp, "h:mm a")}
+                          </span>
+                        )}
+                        <div className="flex flex-col">
+                          <div
+                            className={cn(
+                              "px-4 py-3 relative group",
+                              message.role === "user"
+                                ? "chat-bubble-user text-white"
+                                : "chat-bubble-assistant markdown-content",
+                            )}
+                          >
+                            {message.isTyping && message.role === "assistant" ? (
+                              typingText ? (
+                                <ReactMarkdown
+                                  remarkPlugins={[remarkGfm]}
+                                  rehypePlugins={[rehypeRaw, rehypeSanitize]}
+                                  className="prose prose-sm dark:prose-invert max-w-none"
+                                >
+                                  {typingText}
+                                </ReactMarkdown>
+                              ) : (
+                                <div className="flex items-center gap-1.5 py-1">
+                                  {[0, 1, 2].map((i) => (
+                                    <motion.div
+                                      key={i}
+                                      className="w-2 h-2 rounded-full bg-purple-400"
+                                      animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1, 0.8] }}
+                                      transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
+                                    />
+                                  ))}
+                                </div>
+                              )
+                            ) : message.role === "assistant" ? (
+                              <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                rehypePlugins={[rehypeRaw, rehypeSanitize]}
+                                className="prose prose-sm dark:prose-invert max-w-none"
+                                components={{
+                                  a: ({ node, ...props }: any) => (
+                                    <a {...props} className="text-purple-400 hover:underline" target="_blank" rel="noopener noreferrer" />
+                                  ),
+                                  ul: ({ node, ...props }: any) => <ul {...props} className="list-disc pl-5 my-2 space-y-1" />,
+                                  ol: ({ node, ...props }: any) => <ol {...props} className="list-decimal pl-5 my-2 space-y-1" />,
+                                  li: ({ node, ...props }: any) => <li {...props} className="my-0.5" />,
+                                  h1: ({ node, ...props }: any) => <h1 {...props} className="text-xl font-bold my-3 text-purple-300" />,
+                                  h2: ({ node, ...props }: any) => <h2 {...props} className="text-lg font-semibold my-2 text-purple-300" />,
+                                  h3: ({ node, ...props }: any) => <h3 {...props} className="text-md font-semibold my-2" />,
+                                  p: ({ node, ...props }: any) => <p {...props} className="my-2 leading-relaxed" />,
+                                  code: ({ node, inline, ...props }: any) =>
+                                    inline ? (
+                                      <code {...props} className="bg-purple-500/15 text-purple-300 px-1.5 py-0.5 rounded text-xs" />
+                                    ) : (
+                                      <code {...props} className="block bg-[#0f1420] p-3 rounded-lg text-sm overflow-x-auto my-2 border border-gray-800" />
+                                    ),
+                                  pre: ({ node, ...props }: any) => (
+                                    <pre {...props} className="bg-[#0f1420] p-3 rounded-lg overflow-x-auto my-2 border border-gray-800" />
+                                  ),
+                                  blockquote: ({ node, ...props }: any) => (
+                                    <blockquote {...props} className="border-l-3 border-purple-500 pl-4 italic my-2 bg-purple-500/5 rounded-r-lg py-2 pr-3" />
+                                  ),
+                                }}
+                              >
+                                {message.content}
+                              </ReactMarkdown>
+                            ) : (
+                              <span className="text-sm">{message.content}</span>
+                            )}
+
+                            {/* Save as knowledge card button */}
+                            {message.role === "assistant" && !message.isTyping && (
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="absolute -right-2 -top-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 border border-gray-700 hover:bg-purple-600 hover:border-purple-500"
+                                  >
+                                    <BookmarkPlus className="h-3 w-3" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Save as Knowledge Card</DialogTitle>
+                                    <DialogDescription>
+                                      Create a knowledge card from this information for future reference.
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="grid gap-4 py-4">
+                                    <div className="grid gap-2">
+                                      <Label htmlFor="card-title">Title</Label>
+                                      <Input
+                                        id="card-title"
+                                        placeholder="e.g., How to brush your dog's teeth"
+                                        defaultValue={message.keywords?.length ? `Tips about ${message.keywords[0]}` : ""}
+                                      />
+                                    </div>
+                                    <div className="grid gap-2">
+                                      <Label htmlFor="card-content">Content</Label>
+                                      <Textarea
+                                        id="card-content"
+                                        className="h-24"
+                                        defaultValue={message.content}
+                                        readOnly
+                                      />
+                                    </div>
+                                  </div>
+                                  <DialogFooter>
+                                    <Button
+                                      type="submit"
+                                      className="bg-purple-600 hover:bg-purple-500"
+                                      onClick={() => {
+                                        const titleInput = document.getElementById("card-title") as HTMLInputElement
+                                        createKnowledgeCard(message, titleInput.value)
+                                      }}
+                                    >
+                                      Save Card
+                                    </Button>
+                                  </DialogFooter>
+                                </DialogContent>
+                              </Dialog>
+                            )}
+                          </div>
+
+                          {/* Keyword badges */}
+                          {message.keywords && message.keywords.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1.5">
+                              {message.keywords.map((keyword, i) => (
+                                <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                                  {keyword}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {message.role === "user" && (
+                        <div className="flex-shrink-0 mt-1">
+                          <div className={cn(
+                            "w-8 h-8 rounded-xl flex items-center justify-center text-sm font-semibold",
+                            theme === "dark"
+                              ? "bg-gray-800 text-gray-300 border border-gray-700"
+                              : "bg-gray-200 text-gray-700 border border-gray-300",
+                          )}>
+                            U
+                          </div>
+                        </div>
+                      )}
+                    </motion.div>
+                  ))
                 )}
-              />
-              <VoiceInput onTranscript={handleVoiceInput} isDisabled={isLoading} theme={theme} colors={colors} />
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button type="submit" size="icon" className={colors.button} disabled={isLoading || !input.trim()}>
-                  <Send className="h-4 w-4" />
-                </Button>
-              </motion.div>
-            </motion.form>
-          </div>
+              </AnimatePresence>
 
-          {/* Team Members Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className={cn("mt-8 pt-8 pb-4 border-t", theme === "dark" ? "border-gray-800" : "border-gray-200")}
-          >
-            <div className="text-center mb-4">
-              <h3 className={cn("text-lg font-semibold", colors.primary)}>Meet The Team</h3>
-              <p className={cn("text-sm", theme === "dark" ? "text-gray-400" : "text-gray-600")}>
-                Created by our talented developers
-              </p>
-            </div>
+              {/* Quick Suggestions */}
+              {messages.length > 0 && !isLoading && !isTyping && (
+                <QuickSuggestions
+                  onSelectSuggestion={handleSuggestionSelect}
+                  lastUserMessage={lastUserMessage}
+                  theme={theme}
+                  colors={colors}
+                />
+              )}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[
-                {
-                  name: "Hemant Srivastava",
-                  regNo: "12305227",
-                  avatar: "A",
-                },
-
-              ].map((member, index) => (
+              {/* Typing indicator */}
+              {isLoading && !isTyping && (
                 <motion.div
-                  key={index}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.3 + index * 0.1 }}
-                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                  className={cn(
-                    "flex flex-col items-center p-4 rounded-lg",
-                    theme === "dark" ? "bg-gray-800/50" : "bg-gray-50",
-                    "border",
-                    theme === "dark" ? "border-gray-700" : "border-gray-200",
-                  )}
+                  className="flex items-start gap-3 mb-4"
                 >
-                  <div className="mb-3">
-                    <Avatar className={cn("h-16 w-16", colors.bg, "border-2", colors.border)}>
-                      <AvatarFallback className={cn("text-xl font-bold", colors.primary)}>
-                        {member.avatar}
-                      </AvatarFallback>
-                    </Avatar>
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/15">
+                    <PetIcon className="w-4 h-4 text-white" />
                   </div>
-                  <h4 className="font-medium text-base">{member.name}</h4>
-                  <p className={cn("text-sm", theme === "dark" ? "text-gray-400" : "text-gray-600")}>
-
-                  </p>
+                  <div className="chat-bubble-assistant px-4 py-3">
+                    <div className="flex items-center gap-1.5">
+                      {[0, 1, 2].map((i) => (
+                        <motion.div
+                          key={i}
+                          className="w-2 h-2 rounded-full bg-purple-400"
+                          animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.1, 0.8] }}
+                          transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 </motion.div>
-              ))}
+              )}
+              <div ref={messagesEndRef} />
             </div>
-          </motion.div>
-        </main>
+          </div>
+
+          {/* ═══ STICKY INPUT BAR ═══ */}
+          <div className={cn(
+            "chat-input-wrapper",
+            theme === "dark" ? "bg-[#0c111d]/90 backdrop-blur-xl" : "bg-[#e4e4e4]/90 backdrop-blur-xl",
+          )}>
+            <form
+              onSubmit={handleSubmit}
+              className="max-w-4xl mx-auto"
+            >
+              <div className={cn(
+                "flex items-center gap-2 rounded-2xl p-2",
+                theme === "dark" ? "neu-inset" : "neu-inset",
+              )}>
+                <Input
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ask about your pet..."
+                  className={cn(
+                    "flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm placeholder:text-gray-500",
+                    theme === "dark" ? "text-gray-100" : "text-gray-800",
+                  )}
+                />
+                <VoiceInput onTranscript={handleVoiceInput} isDisabled={isLoading} theme={theme} colors={colors} />
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    type="submit"
+                    size="icon"
+                    className="h-9 w-9 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-lg shadow-purple-500/25 transition-all"
+                    disabled={isLoading || !input.trim()}
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </motion.div>
+              </div>
+            </form>
+            {/* Minimal footer */}
+            <p className="text-center text-[10px] text-gray-600 mt-2">
+              PawGuide — Built by Hemant Srivastava
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   )
 }
+
 
