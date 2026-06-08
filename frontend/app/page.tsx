@@ -578,9 +578,13 @@ function PetChatbot() {
           cache: "no-store",
         })
         if (!response.ok) {
-          if (response.status === 429) {
+          try {
             const errorData = await response.json()
-            throw new Error(errorData.text || "Rate limit exceeded")
+            if (errorData.text) {
+              throw new Error(errorData.text)
+            }
+          } catch (e) {
+            // Ignore parsing errors and fall back to default error
           }
           throw new Error(`Server responded with status: ${response.status}`)
         }
