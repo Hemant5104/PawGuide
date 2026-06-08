@@ -87,7 +87,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
-        text: "I'm having trouble connecting to my knowledge base right now. Please try again in a moment.",
+        text: `I'm having trouble connecting to my knowledge base right now. Error details: ${errorMessage}`,
       },
       { status: 500 },
     )
