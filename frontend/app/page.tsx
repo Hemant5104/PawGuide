@@ -578,15 +578,16 @@ function PetChatbot() {
           cache: "no-store",
         })
         if (!response.ok) {
+          let errorMsg = `Server responded with status: ${response.status}`
           try {
             const errorData = await response.json()
             if (errorData.text) {
-              throw new Error(errorData.text)
+              errorMsg = errorData.text
             }
           } catch (e) {
-            // Ignore parsing errors and fall back to default error
+            // Ignore parsing errors
           }
-          throw new Error(`Server responded with status: ${response.status}`)
+          throw new Error(errorMsg)
         }
       } catch (fetchError) {
         console.log("Main API failed, trying fallback:", fetchError)
